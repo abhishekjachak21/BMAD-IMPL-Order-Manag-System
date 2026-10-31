@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -17,5 +20,20 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createOrder(request));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getOrder(id));
+    }
+
+    @GetMapping("/{id}/status")
+    public ResponseEntity<Map<String, String>> getOrderStatus(@PathVariable UUID id) {
+        return ResponseEntity.ok(Map.of("status", service.getOrder(id).status()));
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.cancelOrder(id));
     }
 }

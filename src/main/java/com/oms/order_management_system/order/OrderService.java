@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -18,8 +19,8 @@ public class OrderService {
     private final InventoryService inventoryService;
 
     public OrderService(OrderRepository orderRepository,
-                       ProductRepository productRepository,
-                       InventoryService inventoryService) {
+                        ProductRepository productRepository,
+                        InventoryService inventoryService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.inventoryService = inventoryService;
@@ -60,7 +61,29 @@ public class OrderService {
 
         InventoryReservation reservation = inventoryService.reserveForOrder(order, request.productId(), request.quantity());
         order.addReservation(reservation);
+        order = orderRepository.save(order);
+        return OrderResponse.from(order);
+    }
 
+    @Transactional(readOnly = true)
+    public OrderResponse getOrder(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+        return OrderResponse.from(order);
+    }
+
+    @Transactional
+    public OrderResponse cancelOrder(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+
+        if (order.getStatus() == OrderStatus.FULFILLED || order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("Order cannot be cancelled from status " + order.getStatus());
+        }
+
+        inventoryService.releaseReservationForOrder(orderId);
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCancelledAt(Instant.now());
         order = orderRepository.save(order);
         return OrderResponse.from(order);
     }

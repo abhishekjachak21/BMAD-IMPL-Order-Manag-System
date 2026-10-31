@@ -1,0 +1,87 @@
+{
+  "info": {
+    "name": "OMS Demo API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Sample requests for Product, Inventory, Order and Payment demo flow"
+  },
+  "item": [
+    {
+      "name": "Create Product",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sku\": \"SKU-DEMO-100\",\n  \"name\": \"Demo Keyboard\",\n  \"description\": \"Mechanical keyboard\",\n  \"price\": 59.99\n}"
+        },
+        "url": {"raw": "http://localhost:8081/api/products", "protocol": "http", "host": ["localhost"], "port": "8081", "path": ["api", "products"]}
+      }
+    },
+    {
+      "name": "Adjust Inventory",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"delta\": 25\n}"
+        },
+        "url": {"raw": "http://localhost:8081/api/inventory/products/{{productId}}/adjust", "host": ["localhost"], "protocol": "http", "port": "8081", "path": ["api", "inventory", "products", "{{productId}}", "adjust"]}
+      }
+    },
+    {
+      "name": "Create Order",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"cust-demo\",\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2\n}"
+        },
+        "url": {"raw": "http://localhost:8081/api/orders", "protocol": "http", "host": ["localhost"], "port": "8081", "path": ["api", "orders"]}
+      }
+    },
+    {
+      "name": "Process Payment Success",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idempotencyKey\": \"idem-demo-success-001\",\n  \"amount\": 119.98,\n  \"providerMode\": \"SUCCESS\"\n}"
+        },
+        "url": {"raw": "http://localhost:8081/api/orders/{{orderId}}/payments", "protocol": "http", "host": ["localhost"], "port": "8081", "path": ["api", "orders", "{{orderId}}", "payments"]}
+      }
+    },
+    {
+      "name": "Process Payment Timeout",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idempotencyKey\": \"idem-demo-timeout-001\",\n  \"amount\": 59.99,\n  \"providerMode\": \"TIMEOUT\"\n}"
+        },
+        "url": {"raw": "http://localhost:8081/api/orders/{{orderId}}/payments", "protocol": "http", "host": ["localhost"], "port": "8081", "path": ["api", "orders", "{{orderId}}", "payments"]}
+      }
+    },
+    {
+      "name": "Get Latest Payment",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "http://localhost:8081/api/orders/{{orderId}}/payments/latest", "protocol": "http", "host": ["localhost"], "port": "8081", "path": ["api", "orders", "{{orderId}}", "payments", "latest"]}
+      }
+    },
+    {
+      "name": "Get Order Status",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "http://localhost:8081/api/orders/{{orderId}}/status", "protocol": "http", "host": ["localhost"], "port": "8081", "path": ["api", "orders", "{{orderId}}", "status"]}
+      }
+    }
+  ],
+  "variable": [
+    {"key": "productId", "value": ""},
+    {"key": "orderId", "value": ""}
+  ]
+}
