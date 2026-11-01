@@ -41,13 +41,14 @@ public class PaymentService {
         if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
             throw new IllegalArgumentException("idempotencyKey is required");
         }
-        if (order.getStatus() == OrderStatus.PAID || order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FULFILLED || order.getStatus() == OrderStatus.DELIVERED) {
-            throw new IllegalStateException("Payment cannot be processed for order status " + order.getStatus());
-        }
 
         Payment existingByKey = paymentRepository.findByIdempotencyKey(request.idempotencyKey()).orElse(null);
         if (existingByKey != null) {
             return PaymentResponse.from(existingByKey, "Returned existing payment operation for same idempotency key");
+        }
+
+        if (order.getStatus() == OrderStatus.PAID || order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FULFILLED || order.getStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalStateException("Payment cannot be processed for order status " + order.getStatus());
         }
 
         List<Payment> activePayments = paymentRepository.findByOrderIdAndStatusIn(orderId,
